@@ -13,9 +13,9 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
-  font_awesome_flutter: ^10.4.0
+  font_awesome_flutter: ^11.0.0
   custom_navigation_bar: ^0.8.2
-  simple_animations: ^4.0.1
+  simple_animations: ^5.3.0
   supercharged: ^2.1.1
   flutter_launcher_icons: ^0.13.0
 

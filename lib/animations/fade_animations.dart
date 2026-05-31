@@ -1,37 +1,77 @@
 import 'package:flutter/material.dart';
-import 'package:supercharged/supercharged.dart';
-import 'package:simple_animations/simple_animations.dart';
 
-enum Aniprops { opacity, translateY }
-
-class FadeAnimation extends StatelessWidget {
-  const FadeAnimation({Key? key, required this.delay, required this.child})
-      : super(key: key);
+class FadeAnimation extends StatefulWidget {
+  const FadeAnimation({
+    super.key,
+    required this.delay,
+    required this.child,
+  });
 
   final double delay;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    final tween = MultiTween<Aniprops>()
-      ..add(Aniprops.opacity, 0.0.tweenTo(1.0), 500.milliseconds)
-      ..add(Aniprops.translateY, (-30.0).tweenTo(0.0), 500.milliseconds,
-          Curves.easeOut);
+  State<FadeAnimation> createState() => _FadeAnimationState();
+}
 
-    return PlayAnimation<MultiTweenValues<Aniprops>>(
-      duration: tween.duration,
-      delay: Duration(milliseconds: (500 * delay).round()),
-      builder: (context, child, value) {
+class _FadeAnimationState extends State<FadeAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacity;
+  late Animation<Offset> _offset;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    _opacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    ));
+
+    _offset = Tween<Offset>(
+      begin: const Offset(0, -0.2),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    ));
+
+    Future.delayed(
+      Duration(milliseconds: (500 * widget.delay).round()),
+      () {
+        if (mounted) _controller.forward();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
         return Opacity(
-          opacity: value.get(Aniprops.opacity),
+          opacity: _opacity.value,
           child: Transform.translate(
-            offset: Offset(0, value.get(Aniprops.translateY)),
-            child: child,
+            offset: _offset.value * 100,
+            child: widget.child,
           ),
         );
       },
-      tween: tween,
-      child: child,
     );
   }
 }
